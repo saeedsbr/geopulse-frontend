@@ -19,6 +19,9 @@ export interface ConflictParticipant {
   countryName: string;
   isoCode: string;
   role: 'AGGRESSOR' | 'DEFENDER' | 'MEDIATOR' | 'ALLY';
+  side?: 'AGGRESSOR' | 'DEFENDER';
+  allyOf?: string;
+  description?: string;
 }
 
 export interface ConflictEvent {

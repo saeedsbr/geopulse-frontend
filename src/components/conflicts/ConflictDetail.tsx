@@ -48,18 +48,70 @@ export default function ConflictDetail({
           </div>
 
           <h3 className="mt-6 text-lg font-semibold text-white">Participants</h3>
-          <div className="mt-4 flex flex-wrap gap-3">
-            {conflict.participants.map((participant) => (
-              <Link
-                key={participant.isoCode}
-                href={`/countries/${participant.isoCode}`}
-                className="rounded-xl border border-dark-700 bg-dark-950/70 px-4 py-3 text-sm text-dark-300 hover:border-primary-500/40 transition-colors"
-              >
-                <p className="font-medium text-white">{participant.countryName}</p>
-                <p className="mt-1 text-dark-400">{participant.role}</p>
-                <p className="mt-1 text-xs text-primary-400">View profile →</p>
-              </Link>
-            ))}
+
+          <div className="mt-4 space-y-4">
+            <div>
+              <p className="text-xs uppercase tracking-wider text-red-400/70 mb-2">Aggressor side</p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {conflict.participants.filter(p => p.side === 'AGGRESSOR' || (!p.side && p.role === 'AGGRESSOR')).map((participant) => (
+                  <Link
+                    key={participant.isoCode}
+                    href={`/countries/${participant.isoCode}`}
+                    className="rounded-xl border px-4 py-3 text-sm hover:border-primary-500/40 transition-colors bg-red-500/5 border-red-500/20"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-white">{participant.countryName}</p>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${participant.role === 'AGGRESSOR' ? 'bg-red-500/20 text-red-400' : 'bg-orange-500/20 text-orange-400'}`}>
+                        {participant.role === 'AGGRESSOR' ? 'LEAD' : `ALLY OF ${participant.allyOf?.toUpperCase() ?? ''}`}
+                      </span>
+                    </div>
+                    {participant.description && <p className="mt-1.5 text-xs text-dark-400 leading-relaxed">{participant.description}</p>}
+                    <p className="mt-2 text-xs text-primary-400">View profile →</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="text-xs uppercase tracking-wider text-blue-400/70 mb-2">Defender side</p>
+              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {conflict.participants.filter(p => p.side === 'DEFENDER' || (!p.side && p.role === 'DEFENDER')).map((participant) => (
+                  <Link
+                    key={participant.isoCode}
+                    href={`/countries/${participant.isoCode}`}
+                    className="rounded-xl border px-4 py-3 text-sm hover:border-primary-500/40 transition-colors bg-blue-500/5 border-blue-500/20"
+                  >
+                    <div className="flex items-center justify-between gap-2">
+                      <p className="font-medium text-white">{participant.countryName}</p>
+                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-bold ${participant.role === 'DEFENDER' ? 'bg-blue-500/20 text-blue-400' : 'bg-cyan-500/20 text-cyan-400'}`}>
+                        {participant.role === 'DEFENDER' ? 'LEAD' : `ALLY OF ${participant.allyOf?.toUpperCase() ?? ''}`}
+                      </span>
+                    </div>
+                    {participant.description && <p className="mt-1.5 text-xs text-dark-400 leading-relaxed">{participant.description}</p>}
+                    <p className="mt-2 text-xs text-primary-400">View profile →</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {conflict.participants.filter(p => p.role === 'MEDIATOR').length > 0 && (
+              <div>
+                <p className="text-xs uppercase tracking-wider text-green-400/70 mb-2">Mediators</p>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {conflict.participants.filter(p => p.role === 'MEDIATOR').map((participant) => (
+                    <Link
+                      key={participant.isoCode}
+                      href={`/countries/${participant.isoCode}`}
+                      className="rounded-xl border px-4 py-3 text-sm hover:border-primary-500/40 transition-colors bg-green-500/5 border-green-500/20"
+                    >
+                      <p className="font-medium text-white">{participant.countryName}</p>
+                      {participant.description && <p className="mt-1.5 text-xs text-dark-400 leading-relaxed">{participant.description}</p>}
+                      <p className="mt-2 text-xs text-primary-400">View profile →</p>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         </div>
 

@@ -3,6 +3,7 @@ import AnalysisFeed from "@/components/analysis/AnalysisFeed";
 import { serverApi } from "@/lib/serverApi";
 
 export const metadata = { title: "Analysis - GeoPulse" };
+export const revalidate = 3600; // Re-fetch analysis every hour
 
 export default async function AnalysisPage({
   searchParams,

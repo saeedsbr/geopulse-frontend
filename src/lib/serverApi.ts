@@ -1,5 +1,6 @@
 import type { Alert, AnalysisResource, Conflict, ConflictEvent, ConflictStat, Country, CountryDashboard, HistoricalEvent, NewsArticle, WarRoom } from "@/lib/types";
 import { fetchRSSNews } from "@/lib/rssFetcher";
+import { fetchAnalysis } from "@/lib/analysisFetcher";
 
 const analysisWatchlistFallback: Country[] = [
   { id: 1, name: "United States", isoCode: "USA", region: "North America", flagUrl: "🇺🇸" },
@@ -17,6 +18,7 @@ const analysisWatchlistFallback: Country[] = [
   { id: 10, name: "Turkey", isoCode: "TUR", region: "Middle East/Europe", flagUrl: "🇹🇷" },
   { id: 28, name: "Egypt", isoCode: "EGY", region: "North Africa", flagUrl: "🇪🇬" },
   { id: 29, name: "Japan", isoCode: "JPN", region: "East Asia", flagUrl: "🇯🇵" },
+  { id: 30, name: "North Korea", isoCode: "PRK", region: "East Asia", flagUrl: "🇰🇵" },
 ];
 import {
   countries,
@@ -112,9 +114,20 @@ export const serverApi = {
 
   getAnalysis: async (countryIso?: string) => {
     const query = countryIso ? `?countryIso=${countryIso}` : "";
-    return fetchWithFallback<AnalysisResource[]>(`/analysis${query}`, () =>
-      countryIso ? analysisResources.filter((item) => item.sourceCountryIso === countryIso) : analysisResources
-    );
+    try {
+      return await fetchJson<AnalysisResource[]>(`/analysis${query}`);
+    } catch {
+      // Backend unavailable — try live YouTube/RSS feeds
+      try {
+        const liveAnalysis = await fetchAnalysis(countryIso);
+        if (liveAnalysis.length > 0) return liveAnalysis;
+      } catch {
+        console.warn("[serverApi] Analysis feed fetch also failed, using mock data");
+      }
+      return countryIso
+        ? analysisResources.filter((item) => item.sourceCountryIso === countryIso)
+        : analysisResources;
+    }
   },
 
   getAnalysisWatchlist: async () =>

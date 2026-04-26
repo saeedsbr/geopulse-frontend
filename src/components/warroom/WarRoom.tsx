@@ -62,8 +62,8 @@ export default function WarRoom({ data }: { data: WarRoomType }) {
                 <p className="mt-4 text-sm leading-6 text-dark-300">{conflict.description}</p>
                 <div className="mt-4 flex flex-wrap gap-2 text-xs text-dark-400">
                   {conflict.participants.map((participant) => (
-                    <span key={`${conflict.id}-${participant.isoCode}`} className="rounded-full border border-dark-700 px-2.5 py-1">
-                      {participant.countryName} · {participant.role}
+                    <span key={`${conflict.id}-${participant.isoCode}`} className={`rounded-full border px-2.5 py-1 ${participant.side === 'AGGRESSOR' || (!participant.side && participant.role === 'AGGRESSOR') ? 'border-red-500/30 text-red-400/80' : participant.side === 'DEFENDER' || (!participant.side && participant.role === 'DEFENDER') ? 'border-blue-500/30 text-blue-400/80' : 'border-dark-700'}`}>
+                      {participant.countryName} · {participant.role === 'ALLY' && participant.allyOf ? `Ally of ${participant.allyOf}` : participant.role}
                     </span>
                   ))}
                 </div>

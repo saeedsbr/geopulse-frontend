@@ -215,22 +215,23 @@ export default function CountryDashboard({ dashboard }: { dashboard: CountryDash
                       </div>
                     </Link>
                     {conflict.participants && conflict.participants.length > 0 && (
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {conflict.participants.filter(p => p.role === 'AGGRESSOR').map(p => (
-                          <span key={p.countryId} className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400 border border-red-500/20">
-                            ⚔ Attacker: {p.countryName}
-                          </span>
-                        ))}
-                        {conflict.participants.filter(p => p.role === 'DEFENDER').map(p => (
-                          <span key={p.countryId} className="inline-flex items-center gap-1 rounded-full bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-500/20">
-                            🛡 Defender: {p.countryName}
-                          </span>
-                        ))}
-                        {conflict.participants.filter(p => p.role === 'ALLY').map(p => (
-                          <span key={p.countryId} className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-400 border border-amber-500/20">
-                            🤝 Ally: {p.countryName}
-                          </span>
-                        ))}
+                      <div className="mt-3 space-y-2">
+                        <div className="flex flex-wrap gap-2">
+                          <span className="text-[10px] uppercase tracking-wider text-red-400/70 w-full">Aggressor side</span>
+                          {conflict.participants.filter(p => p.side === 'AGGRESSOR' || (!p.side && p.role === 'AGGRESSOR')).map(p => (
+                            <span key={p.countryId} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold border ${p.role === 'AGGRESSOR' ? 'bg-red-500/15 text-red-400 border-red-500/20' : 'bg-orange-500/15 text-orange-400 border-orange-500/20'}`}>
+                              {p.role === 'AGGRESSOR' ? '⚔' : '🤝'} {p.countryName}{p.allyOf ? ` (ally of ${p.allyOf})` : ''}
+                            </span>
+                          ))}
+                        </div>
+                        <div className="flex flex-wrap gap-2">
+                          <span className="text-[10px] uppercase tracking-wider text-blue-400/70 w-full">Defender side</span>
+                          {conflict.participants.filter(p => p.side === 'DEFENDER' || (!p.side && p.role === 'DEFENDER')).map(p => (
+                            <span key={p.countryId} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold border ${p.role === 'DEFENDER' ? 'bg-blue-500/15 text-blue-400 border-blue-500/20' : 'bg-cyan-500/15 text-cyan-400 border-cyan-500/20'}`}>
+                              {p.role === 'DEFENDER' ? '🛡' : '🤝'} {p.countryName}{p.allyOf ? ` (ally of ${p.allyOf})` : ''}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     )}
                     <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">{conflict.description ?? "Conflict summary pending."}</p>
@@ -252,22 +253,23 @@ export default function CountryDashboard({ dashboard }: { dashboard: CountryDash
                     <span className={`badge-${conflict.status.toLowerCase()}`}>{conflict.status}</span>
                   </div>
                   {conflict.participants && conflict.participants.length > 0 && (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {conflict.participants.filter(p => p.role === 'AGGRESSOR').map(p => (
-                        <span key={p.countryId} className="inline-flex items-center gap-1 rounded-full bg-red-500/15 px-2.5 py-0.5 text-xs font-semibold text-red-400 border border-red-500/20">
-                          ⚔ Attacker: {p.countryName}
-                        </span>
-                      ))}
-                      {conflict.participants.filter(p => p.role === 'DEFENDER').map(p => (
-                        <span key={p.countryId} className="inline-flex items-center gap-1 rounded-full bg-blue-500/15 px-2.5 py-0.5 text-xs font-semibold text-blue-400 border border-blue-500/20">
-                          🛡 Defender: {p.countryName}
-                        </span>
-                      ))}
-                      {conflict.participants.filter(p => p.role === 'ALLY').map(p => (
-                        <span key={p.countryId} className="inline-flex items-center gap-1 rounded-full bg-amber-500/15 px-2.5 py-0.5 text-xs font-semibold text-amber-400 border border-amber-500/20">
-                          🤝 Ally: {p.countryName}
-                        </span>
-                      ))}
+                    <div className="mt-3 space-y-2">
+                      <div className="flex flex-wrap gap-2">
+                        <span className="text-[10px] uppercase tracking-wider text-red-400/70 w-full">Aggressor side</span>
+                        {conflict.participants.filter(p => p.side === 'AGGRESSOR' || (!p.side && p.role === 'AGGRESSOR')).map(p => (
+                          <span key={p.countryId} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold border ${p.role === 'AGGRESSOR' ? 'bg-red-500/15 text-red-400 border-red-500/20' : 'bg-orange-500/15 text-orange-400 border-orange-500/20'}`}>
+                            {p.role === 'AGGRESSOR' ? '⚔' : '🤝'} {p.countryName}{p.allyOf ? ` (ally of ${p.allyOf})` : ''}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="flex flex-wrap gap-2">
+                        <span className="text-[10px] uppercase tracking-wider text-blue-400/70 w-full">Defender side</span>
+                        {conflict.participants.filter(p => p.side === 'DEFENDER' || (!p.side && p.role === 'DEFENDER')).map(p => (
+                          <span key={p.countryId} className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold border ${p.role === 'DEFENDER' ? 'bg-blue-500/15 text-blue-400 border-blue-500/20' : 'bg-cyan-500/15 text-cyan-400 border-cyan-500/20'}`}>
+                            {p.role === 'DEFENDER' ? '🛡' : '🤝'} {p.countryName}{p.allyOf ? ` (ally of ${p.allyOf})` : ''}
+                          </span>
+                        ))}
+                      </div>
                     </div>
                   )}
                   <p className="mt-3 text-sm text-[var(--muted)] leading-relaxed">{conflict.description ?? "Historical record pending."}</p>
