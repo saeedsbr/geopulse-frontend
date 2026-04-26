@@ -1,4 +1,5 @@
 import type { Alert, AnalysisResource, Conflict, ConflictEvent, ConflictStat, Country, CountryDashboard, HistoricalEvent, NewsArticle, WarRoom } from "@/lib/types";
+import { fetchRSSNews } from "@/lib/rssFetcher";
 
 const analysisWatchlistFallback: Country[] = [
   { id: 1, name: "United States", isoCode: "USA", region: "North America", flagUrl: "🇺🇸" },
@@ -94,7 +95,19 @@ export const serverApi = {
     }),
 
   getNews: async () => {
-    return fetchWithFallback<NewsArticle[]>("/news?page=0&size=20", () => newsArticles);
+    try {
+      const response = await fetchJson<NewsArticle[] | PageResponse<NewsArticle>>("/news?page=0&size=20");
+      return Array.isArray(response) ? response : response.content ?? [];
+    } catch {
+      // Backend unavailable — try live RSS feeds
+      try {
+        const rssArticles = await fetchRSSNews();
+        if (rssArticles.length > 0) return rssArticles;
+      } catch {
+        console.warn("[serverApi] RSS fetch also failed, using mock data");
+      }
+      return newsArticles;
+    }
   },
 
   getAnalysis: async (countryIso?: string) => {
