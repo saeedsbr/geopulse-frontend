@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Activity, Globe2, Landmark, Newspaper, ShieldAlert } from "lucide-react";
+import { Activity, Globe2, Landmark, Newspaper, ShieldAlert, LibraryBig } from "lucide-react";
 import clsx from "clsx";
 
 const navItems = [
@@ -11,6 +11,7 @@ const navItems = [
   { href: "/events", label: "Historical Events", icon: Landmark },
   { href: "/countries", label: "Country Intel", icon: Globe2 },
   { href: "/news", label: "News Feed", icon: Newspaper },
+  { href: "/analysis", label: "Analysis", icon: LibraryBig },
 ];
 
 export default function Sidebar() {

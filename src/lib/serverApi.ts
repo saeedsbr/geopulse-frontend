@@ -1,4 +1,4 @@
-import type { Alert, Conflict, ConflictEvent, ConflictStat, Country, CountryDashboard, HistoricalEvent, NewsArticle, WarRoom } from "@/lib/types";
+import type { Alert, AnalysisResource, Conflict, ConflictEvent, ConflictStat, Country, CountryDashboard, HistoricalEvent, NewsArticle, WarRoom } from "@/lib/types";
 import {
   countries,
   conflicts,
@@ -7,6 +7,7 @@ import {
   alerts,
   dashboards,
   historicalEvents,
+  analysisResources,
   getConflictById,
   getConflictEvents as getMockConflictEvents,
   getConflictStats as getMockConflictStats,
@@ -77,6 +78,8 @@ export const serverApi = {
   getNews: async () => {
     return fetchWithFallback<NewsArticle[]>("/news?page=0&size=20", () => newsArticles);
   },
+
+  getAnalysis: async () => analysisResources,
 
   getAlerts: async () => {
     return fetchWithFallback<Alert[]>("/alerts?page=0&size=20", () => alerts);
