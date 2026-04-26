@@ -129,6 +129,20 @@ export interface AnalysisVideo {
   conflictId?: number;
 }
 
+export interface AnalysisResource {
+  id: string;
+  type: 'VIDEO' | 'ARTICLE';
+  title: string;
+  summary: string;
+  source: string;
+  url: string;
+  publishedAt: string;
+  region: string;
+  topics: string[];
+  analyst?: string;
+  platform?: string;
+}
+
 export interface HistoricalMilestone {
   id: number;
   year: number;
