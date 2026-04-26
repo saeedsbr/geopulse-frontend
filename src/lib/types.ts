@@ -130,17 +130,20 @@ export interface AnalysisVideo {
 }
 
 export interface AnalysisResource {
-  id: string;
+  id: string | number;
   type: 'VIDEO' | 'ARTICLE';
   title: string;
   summary: string;
   source: string;
   url: string;
   publishedAt: string;
+  fetchedAt?: string;
   region: string;
   topics: string[];
   analyst?: string;
   platform?: string;
+  sourceCountryIso?: string;
+  sourceCountryName?: string;
 }
 
 export interface HistoricalMilestone {

@@ -6,6 +6,14 @@ function typeTone(type: AnalysisResource['type']) {
 }
 
 export default function AnalysisFeed({ resources }: { resources: AnalysisResource[] }) {
+  if (!resources.length) {
+    return (
+      <div className="card text-sm text-[var(--muted)]">
+        No analyst resources found for this country yet. The feed refreshes every hour.
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {resources.map((resource) => (
@@ -16,6 +24,7 @@ export default function AnalysisFeed({ resources }: { resources: AnalysisResourc
                 <span className={typeTone(resource.type)}>{resource.type}</span>
                 <span className="text-xs text-[var(--muted)]">{resource.source}</span>
                 <span className="text-xs text-[var(--muted)]">{resource.region}</span>
+                {resource.sourceCountryName && <span className="text-xs text-[var(--muted)]">{resource.sourceCountryName}</span>}
               </div>
               <div>
                 <h2 className="text-xl font-semibold text-[var(--foreground)]">{resource.title}</h2>
@@ -33,6 +42,12 @@ export default function AnalysisFeed({ resources }: { resources: AnalysisResourc
 
           <div className="mt-4 flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
             <span>{new Date(resource.publishedAt).toLocaleString()}</span>
+            {resource.fetchedAt && (
+              <>
+                <span>•</span>
+                <span>Updated {new Date(resource.fetchedAt).toLocaleTimeString()}</span>
+              </>
+            )}
             {resource.analyst && (
               <>
                 <span>•</span>
