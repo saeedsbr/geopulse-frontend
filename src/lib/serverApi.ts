@@ -89,12 +89,32 @@ export const serverApi = {
 
   getCountries: () => fetchWithFallback<Country[]>("/countries", () => countries),
 
-  getCountryDashboard: (isoCode: string) =>
-    fetchWithFallback<CountryDashboard>(`/countries/iso/${isoCode}/dashboard`, () => {
-      const dashboard = dashboards[isoCode.toUpperCase()];
-      if (!dashboard) throw new Error(`Country ${isoCode} not found in mock data`);
-      return dashboard;
-    }),
+  getCountryDashboard: async (isoCode: string): Promise<CountryDashboard> => {
+    const mockDashboard = dashboards[isoCode.toUpperCase()];
+    try {
+      const backendData = await fetchJson<CountryDashboard>(`/countries/iso/${isoCode}/dashboard`);
+      // Merge: use mock data to fill in gaps the backend doesn't have
+      if (mockDashboard) {
+        return {
+          ...mockDashboard,
+          ...backendData,
+          profile: backendData.profile ?? mockDashboard.profile,
+          relations: backendData.relations?.length ? backendData.relations : mockDashboard.relations,
+          historicalMilestones: mockDashboard.historicalMilestones?.length ? mockDashboard.historicalMilestones : (backendData.historicalMilestones ?? []),
+          economy: {
+            ...mockDashboard.economy,
+            ...(backendData.economy?.gdpUsd ? backendData.economy : {}),
+          },
+          activeConflicts: backendData.activeConflicts?.length ? backendData.activeConflicts : mockDashboard.activeConflicts,
+        };
+      }
+      return backendData;
+    } catch {
+      console.warn(`[serverApi] Backend unavailable for /countries/iso/${isoCode}/dashboard, using mock data`);
+      if (!mockDashboard) throw new Error(`Country ${isoCode} not found in mock data`);
+      return mockDashboard;
+    }
+  },
 
   getNews: async () => {
     try {
