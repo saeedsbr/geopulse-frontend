@@ -13,7 +13,7 @@ export default async function CountriesPage() {
 
   return (
     <div>
-      <h1 className="text-3xl font-bold text-white mb-6">Country Intelligence</h1>
+      <h1 className="text-3xl font-bold text-[var(--foreground)] mb-6">Country Intelligence</h1>
       <CountryGrid dashboards={dashboards} />
     </div>
   );
