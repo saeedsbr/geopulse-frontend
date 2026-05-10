@@ -57,6 +57,9 @@ export const conflicts: Conflict[] = [
     territoryChangeSqKm: 0,
     economicLossUsd: 3200000000,
     linkedEventIds: ["cia-coup-iran-1953", "iran-revolution-1979", "iran-iraq-war-1988", "jcpoa-nuclear-deal-2015"],
+    escalationTrend: "ESCALATING",
+    trendDelta: 12.5,
+    casualtyHistory: [180, 195, 210, 240, 260, 285, 310],
   },
   {
     id: 2,
@@ -81,6 +84,9 @@ export const conflicts: Conflict[] = [
     totalCasualties: 285000,
     territoryChangeSqKm: 12850,
     economicLossUsd: 486000000000,
+    escalationTrend: "STABLE",
+    trendDelta: -2.1,
+    casualtyHistory: [42000, 41800, 42100, 41500, 41200, 40900, 40500],
   },
   {
     id: 3,
@@ -101,6 +107,9 @@ export const conflicts: Conflict[] = [
     totalCasualties: 12,
     territoryChangeSqKm: 0,
     economicLossUsd: 900000000,
+    escalationTrend: "DE_ESCALATING",
+    trendDelta: -8.0,
+    casualtyHistory: [3, 2, 2, 2, 1, 1, 0],
   },
 ];
 
@@ -3465,6 +3474,10 @@ export const warRoomData: WarRoom = {
     totalCountriesAffected: 7,
     totalCasualties: conflicts.reduce((sum, conflict) => sum + conflict.totalCasualties, 0),
     criticalAlerts: alerts.filter((alert) => alert.severity === "CRITICAL").length,
+    casualtyDelta: 4.2,
+    alertDelta: 50.0,
+    conflictDelta: 0,
+    countriesDelta: 1,
   },
 };
 

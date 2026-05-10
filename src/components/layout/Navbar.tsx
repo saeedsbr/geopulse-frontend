@@ -1,13 +1,26 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { Bell, Search, User, Globe } from "lucide-react";
+import { Bell, User, Globe } from "lucide-react";
 import ThemeToggle from "@/components/theme/ThemeToggle";
 import GlobalSearch from "@/components/search/GlobalSearch";
+import { useGeoPulseStore } from "@/lib/store";
 
 export default function Navbar() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const connectionState = useGeoPulseStore((s) => s.connectionState);
+
+  const dotColor =
+    connectionState === "connected"
+      ? "bg-green-500"
+      : connectionState === "polling"
+        ? "bg-yellow-500"
+        : "bg-red-500";
+
+  const label =
+    connectionState === "connected"
+      ? "Live"
+      : connectionState === "polling"
+        ? "Polling"
+        : "Offline";
 
   return (
     <header className="border-b px-6 py-3 flex items-center justify-between bg-[var(--panel)] border-[var(--border)] transition-colors">
@@ -20,8 +33,10 @@ export default function Navbar() {
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2 text-xs text-[var(--muted)]">
           <Globe className="w-3.5 h-3.5" />
-          <span>Live</span>
-          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+          <span>{label}</span>
+          <span
+            className={`w-2 h-2 ${dotColor} rounded-full animate-pulse`}
+          />
         </div>
 
         <button className="relative p-2 text-[var(--muted)] hover:text-[var(--foreground)] transition-colors">

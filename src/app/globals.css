@@ -107,6 +107,17 @@ html[data-theme="light"] {
   50% { opacity: 0.7; box-shadow: 0 0 0 6px rgba(239, 68, 68, 0); }
 }
 
+@keyframes ticker-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-track {
+  animation: ticker-scroll 30s linear infinite;
+}
+.ticker-track:hover {
+  animation-play-state: paused;
+}
+
 ::-webkit-scrollbar {
   width: 6px;
 }

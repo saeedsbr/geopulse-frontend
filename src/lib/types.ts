@@ -12,6 +12,9 @@ export interface Conflict {
   territoryChangeSqKm: number;
   economicLossUsd: number;
   linkedEventIds?: string[];
+  escalationTrend?: 'ESCALATING' | 'DE_ESCALATING' | 'STABLE';
+  trendDelta?: number;
+  casualtyHistory?: number[];
 }
 
 export interface ConflictParticipant {
@@ -237,4 +240,22 @@ export interface GlobalStats {
   totalCountriesAffected: number;
   totalCasualties: number;
   criticalAlerts: number;
+  casualtyDelta?: number;
+  alertDelta?: number;
+  conflictDelta?: number;
+  countriesDelta?: number;
+}
+
+export interface HomepageFilters {
+  regions: string[];
+  severities: ('CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW')[];
+  countries: string[];
+  conflictStatuses: ('ACTIVE' | 'FROZEN' | 'RESOLVED')[];
+}
+
+export interface WatchlistItem {
+  type: 'country' | 'conflict';
+  id: string;
+  name: string;
+  pinnedAt: string;
 }
