@@ -87,6 +87,7 @@ export default function CountryDashboard({
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [loadingTimeline, setLoadingTimeline] = useState(true);
   const [timelineError, setTimelineError] = useState(false);
+  const [expandedMilestones, setExpandedMilestones] = useState<Record<number, boolean>>({});
 
   const { addToWatchlist, removeFromWatchlist, isWatched } = useGeoPulseStore();
   const watched = isWatched("country", dashboard.country.isoCode);
@@ -306,13 +307,10 @@ export default function CountryDashboard({
                       </div>
                     )}
 
-                    {milestone.eventId && (
-                      <p className="mt-3 text-xs font-medium text-primary-400">
-                        View full event detail →
-                      </p>
-                    )}
                   </>
                 );
+
+                const isExpanded = expandedMilestones[milestone.id] ?? false;
 
                 return (
                   <div key={milestone.id} className="relative pl-12 pb-8 last:pb-0">
@@ -325,11 +323,62 @@ export default function CountryDashboard({
                         className="block rounded-xl border p-5 bg-[var(--panel-muted)] border-[var(--border)] hover:border-primary-500/40 transition-colors"
                       >
                         {cardContent}
+                        <p className="mt-3 text-xs font-medium text-primary-400">
+                          View full event detail →
+                        </p>
                       </Link>
                     ) : (
-                      <div className="rounded-xl border p-5 bg-[var(--panel-muted)] border-[var(--border)]">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setExpandedMilestones((prev) => ({
+                            ...prev,
+                            [milestone.id]: !prev[milestone.id],
+                          }))
+                        }
+                        className="block w-full text-left rounded-xl border p-5 bg-[var(--panel-muted)] border-[var(--border)] hover:border-primary-500/40 transition-colors"
+                      >
                         {cardContent}
-                      </div>
+                        <p className="mt-3 text-xs font-medium text-primary-400">
+                          {isExpanded ? "Hide sources ↑" : "View sources & detail ↓"}
+                        </p>
+                        {isExpanded && (
+                          <div className="mt-4 border-t border-[var(--border)] pt-4 space-y-3">
+                            {milestone.references.length > 0 ? (
+                              <>
+                                <p className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
+                                  Primary sources
+                                </p>
+                                <ul className="space-y-2">
+                                  {milestone.references.map((ref, idx) => (
+                                    <li key={idx} className="flex items-start gap-2 text-sm">
+                                      <span className="mt-0.5 text-primary-400 shrink-0">›</span>
+                                      <span>
+                                        <a
+                                          href={ref.url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="text-primary-400 hover:text-primary-300 hover:underline"
+                                          onClick={(e) => e.stopPropagation()}
+                                        >
+                                          {ref.title}
+                                        </a>
+                                        <span className="text-[var(--muted)]">
+                                          {" "}— {ref.source}
+                                        </span>
+                                      </span>
+                                    </li>
+                                  ))}
+                                </ul>
+                              </>
+                            ) : (
+                              <p className="text-xs text-[var(--muted)]">
+                                No source references recorded for this milestone.
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </button>
                     )}
                   </div>
                 );
