@@ -40,6 +40,7 @@ function dossierCard(title: string, content?: string) {
 export default function CountryDashboard({ dashboard }: { dashboard: CountryDashboardType }) {
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [loadingTimeline, setLoadingTimeline] = useState(true);
+  const [expandedMilestones, setExpandedMilestones] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     const fetchTimeline = async () => {
@@ -168,9 +169,28 @@ export default function CountryDashboard({ dashboard }: { dashboard: CountryDash
                           {cardContent}
                         </Link>
                       ) : (
-                        <div className="rounded-xl border p-5 bg-[var(--panel-muted)] border-[var(--border)]">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setExpandedMilestones((current) => ({
+                              ...current,
+                              [milestone.id]: !current[milestone.id],
+                            }))
+                          }
+                          className="block w-full rounded-xl border p-5 text-left bg-[var(--panel-muted)] border-[var(--border)] hover:border-primary-500/40 transition-colors"
+                        >
                           {cardContent}
-                        </div>
+                          <p className="mt-3 text-xs font-medium text-primary-400">
+                            {expandedMilestones[milestone.id] ? "Hide detail ↑" : "Open detail ↓"}
+                          </p>
+                          {expandedMilestones[milestone.id] && (
+                            <div className="mt-4 border-t border-[var(--border)] pt-4 text-sm text-[var(--muted-strong)]">
+                              <p>
+                                This milestone does not have a standalone event page yet, so its full detail is shown here in the timeline card.
+                              </p>
+                            </div>
+                          )}
+                        </button>
                       );
                     })()}
                   </div>

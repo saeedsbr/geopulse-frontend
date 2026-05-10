@@ -213,12 +213,23 @@ export interface Alert {
   read: boolean;
 }
 
+export interface WarRoomHighlights {
+  headline: string;
+  summary: string;
+  source: string;
+  sourceUrl: string;
+  publishedAt?: string;
+  confidenceLevel: 'VERIFIED' | 'DISPUTED' | 'UNCONFIRMED';
+}
+
 export interface WarRoom {
   activeConflicts: Conflict[];
   recentEvents: ConflictEvent[];
   breakingNews: NewsArticle[];
   alerts: Alert[];
   globalStats: GlobalStats;
+  highlights?: WarRoomHighlights[];
+  lastUpdated?: string;
 }
 
 export interface GlobalStats {

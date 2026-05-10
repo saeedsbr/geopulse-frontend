@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { AlertTriangle, ArrowRight, Globe, Radar, Shield } from "lucide-react";
+import { AlertTriangle, ArrowRight, Filter, Globe, Radar, Shield } from "lucide-react";
 import type { WarRoom as WarRoomType } from "@/lib/types";
 import ConflictMap from "./ConflictMap";
 import TrendBars from "./TrendBars";
@@ -14,8 +14,21 @@ function StatCard({ label, value, hint }: { label: string; value: string; hint: 
   );
 }
 
+function relativeTime(iso?: string) {
+  if (!iso) return "Unknown";
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const diffMin = Math.floor(diffMs / 60000);
+  if (diffMin < 1) return "Just now";
+  if (diffMin < 60) return `${diffMin}m ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return `${diffHr}h ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  return `${diffDay}d ago`;
+}
+
 export default function WarRoom({ data }: { data: WarRoomType }) {
-  const { activeConflicts, recentEvents, breakingNews, alerts, globalStats } = data;
+  const { activeConflicts, recentEvents, breakingNews, alerts, globalStats, highlights = [], lastUpdated } = data;
+  const topSources = Array.from(new Set(breakingNews.map((item) => item.source))).slice(0, 4);
 
   return (
     <div className="space-y-8">
@@ -37,6 +50,69 @@ export default function WarRoom({ data }: { data: WarRoomType }) {
             <StatCard label="Countries affected" value={String(globalStats.totalCountriesAffected)} hint="Direct participants or pressure points" />
             <StatCard label="Estimated casualties" value={globalStats.totalCasualties.toLocaleString()} hint="Aggregated from backend stats" />
             <StatCard label="Critical alerts" value={String(globalStats.criticalAlerts)} hint="Requires analyst attention" />
+          </div>
+        </div>
+
+        <div className="mt-6 grid gap-4 lg:grid-cols-[1.35fr_0.65fr]">
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-[0.18em] text-primary-300">Situation update</p>
+                <p className="mt-2 text-sm text-dark-300">Last updated {relativeTime(lastUpdated)}</p>
+              </div>
+              <div className="flex flex-wrap gap-2 text-xs text-dark-300">
+                {topSources.map((source) => (
+                  <span key={source} className="rounded-full border border-white/10 px-3 py-1">{source}</span>
+                ))}
+              </div>
+            </div>
+            <div className="mt-4 grid gap-3 md:grid-cols-3">
+              {(highlights.length ? highlights : breakingNews.slice(0, 3).map((item) => ({
+                headline: item.title,
+                summary: item.content,
+                source: item.source,
+                sourceUrl: item.sourceUrl,
+                publishedAt: item.publishedAt,
+                confidenceLevel: item.confidenceLevel,
+              }))).map((highlight) => (
+                <a
+                  key={highlight.headline}
+                  href={highlight.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="rounded-xl border border-white/10 bg-black/20 p-4 transition-colors hover:border-primary-400/40"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={`badge-${highlight.confidenceLevel.toLowerCase()}`}>{highlight.confidenceLevel}</span>
+                    <span className="text-xs text-dark-300">{relativeTime(highlight.publishedAt)}</span>
+                  </div>
+                  <h3 className="mt-3 text-sm font-semibold text-white">{highlight.headline}</h3>
+                  <p className="mt-2 text-sm text-dark-300 line-clamp-3">{highlight.summary}</p>
+                  <p className="mt-3 text-xs text-primary-300">{highlight.source}</p>
+                </a>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-white/10 bg-black/20 p-5">
+            <div className="flex items-center gap-2 text-primary-300">
+              <Filter className="h-4 w-4" />
+              <p className="text-xs font-semibold uppercase tracking-[0.18em]">Focus lanes</p>
+            </div>
+            <div className="mt-4 space-y-3 text-sm text-dark-300">
+              <div>
+                <p className="font-medium text-white">Top active regions</p>
+                <p className="mt-1">{Array.from(new Set(activeConflicts.map((conflict) => conflict.region))).slice(0, 3).join(" • ")}</p>
+              </div>
+              <div>
+                <p className="font-medium text-white">Highest-risk theater</p>
+                <p className="mt-1">{activeConflicts[0]?.name ?? "No live conflict selected"}</p>
+              </div>
+              <div>
+                <p className="font-medium text-white">Analyst recommendation</p>
+                <p className="mt-1">Surface last-updated times, strengthen source visibility, and make more homepage blocks clickable for faster drill-down.</p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
