@@ -11,8 +11,10 @@ import {
   DollarSign,
   Crosshair,
   Map,
+  Clock,
+  Link2,
 } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer } from "recharts";
+import { LineChart, Line, ResponsiveContainer, YAxis, Tooltip } from "recharts";
 import type {
   Conflict,
   ConflictEvent,
@@ -64,23 +66,47 @@ function ConfidenceBadge({ level }: { level: string }) {
   );
 }
 
+function formatDuration(startDate: string, endDate?: string) {
+  const start = new Date(startDate);
+  const end = endDate ? new Date(endDate) : new Date();
+  const diffMs = end.getTime() - start.getTime();
+  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  if (days < 30) return `${days} day${days !== 1 ? "s" : ""}`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `${months} month${months !== 1 ? "s" : ""}`;
+  const years = Math.floor(months / 12);
+  const remainMonths = months % 12;
+  return remainMonths > 0
+    ? `${years}y ${remainMonths}mo`
+    : `${years} year${years !== 1 ? "s" : ""}`;
+}
+
+function formatCompact(value: number) {
+  if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+  if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+  return String(value);
+}
+
 export default function ConflictDetail({
   conflict,
   events,
   stats,
   linkedEvents,
   relatedNews = [],
+  relatedConflicts = [],
 }: {
   conflict: Conflict;
   events: ConflictEvent[];
   stats: ConflictStat[];
   linkedEvents?: HistoricalEvent[];
   relatedNews?: NewsArticle[];
+  relatedConflicts?: Conflict[];
 }) {
   const sparkData = conflict.casualtyHistory?.map((v) => ({ v }));
   const sortedEvents = [...events].sort(
     (a, b) => new Date(b.eventDate).getTime() - new Date(a.eventDate).getTime(),
   );
+  const duration = formatDuration(conflict.startDate, conflict.endDate);
 
   return (
     <div className="space-y-8">
@@ -141,13 +167,22 @@ export default function ConflictDetail({
       </div>
 
       {/* ── Key stats ── */}
-      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
         <div className="card flex items-center gap-3">
           <Calendar className="h-5 w-5 text-primary-400 shrink-0" />
           <div>
             <p className="text-xs text-[var(--muted)]">Started</p>
             <p className="text-sm font-semibold text-[var(--foreground)]">
               {formatDate(conflict.startDate)}
+            </p>
+          </div>
+        </div>
+        <div className="card flex items-center gap-3">
+          <Clock className="h-5 w-5 text-primary-400 shrink-0" />
+          <div>
+            <p className="text-xs text-[var(--muted)]">Duration</p>
+            <p className="text-sm font-semibold text-[var(--foreground)]">
+              {duration}
             </p>
           </div>
         </div>
@@ -205,9 +240,27 @@ export default function ConflictDetail({
       {sparkData && sparkData.length > 1 && (
         <section className="card">
           <h2 className="section-title">Casualty trend</h2>
-          <div className="h-24">
+          <div className="h-32">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={sparkData}>
+              <LineChart data={sparkData} margin={{ left: 10, right: 10, top: 5, bottom: 5 }}>
+                <YAxis
+                  width={50}
+                  tick={{ fill: "var(--muted)", fontSize: 11 }}
+                  tickFormatter={formatCompact}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <Tooltip
+                  contentStyle={{
+                    background: "var(--panel)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    fontSize: 12,
+                    color: "var(--foreground)",
+                  }}
+                  formatter={(value: number) => [value.toLocaleString(), "Casualties"]}
+                  labelFormatter={() => ""}
+                />
                 <Line
                   type="monotone"
                   dataKey="v"
@@ -543,6 +596,60 @@ export default function ConflictDetail({
             "Monitoring continues for escalation signals and strategic shifts."}
         </p>
       </section>
+
+      {/* ── Related conflicts ── */}
+      {relatedConflicts.length > 0 && (
+        <section className="card">
+          <div className="flex items-center gap-2 mb-4">
+            <Link2 className="h-5 w-5 text-primary-400" />
+            <h2 className="section-title mb-0">Related conflicts</h2>
+          </div>
+          <p className="text-sm text-[var(--muted)] mb-4">
+            Conflicts sharing participants with {conflict.name}
+          </p>
+          <div className="grid gap-4 lg:grid-cols-2">
+            {relatedConflicts.map((rc) => {
+              const sharedIsos = rc.participants
+                .filter((p) =>
+                  conflict.participants.some((cp) => cp.isoCode === p.isoCode),
+                )
+                .map((p) => p.countryName);
+              return (
+                <Link
+                  key={rc.id}
+                  href={`/conflicts/${rc.id}`}
+                  className="block rounded-xl border border-[var(--border)] bg-[var(--panel-muted)] p-4 hover:border-primary-500/40 transition-colors"
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <h3 className="font-medium text-[var(--foreground)]">
+                      {rc.name}
+                    </h3>
+                    <div className="flex gap-1.5">
+                      <span className={`badge-${rc.severity.toLowerCase()}`}>
+                        {rc.severity}
+                      </span>
+                      <span className={`badge-${rc.status.toLowerCase()}`}>
+                        {rc.status}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="mt-2 text-sm text-[var(--muted)] line-clamp-2">
+                    {rc.description}
+                  </p>
+                  <div className="mt-3 flex items-center gap-2 text-xs text-[var(--muted)]">
+                    <span className="text-primary-400">Shared:</span>
+                    <span>{sharedIsos.join(", ")}</span>
+                  </div>
+                  <div className="mt-2 flex items-center gap-4 text-xs text-[var(--muted)]">
+                    <span>{rc.totalCasualties.toLocaleString()} casualties</span>
+                    <span>${(rc.economicLossUsd / 1_000_000_000).toFixed(1)}B losses</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </div>
+        </section>
+      )}
 
       {/* ── Historical context ── */}
       {linkedEvents && linkedEvents.length > 0 && (

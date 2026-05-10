@@ -2,8 +2,11 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
-import { Search, ChevronDown, ChevronUp, X, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Search, ChevronDown, ChevronUp, X, TrendingUp, TrendingDown, Minus, ArrowUpDown } from "lucide-react";
 import type { Conflict } from "@/lib/types";
+
+type SortKey = "severity" | "casualties" | "date" | "name";
+const SEVERITY_ORDER: Record<string, number> = { CRITICAL: 0, HIGH: 1, MEDIUM: 2, LOW: 3 };
 
 function TogglePill({
   label,
@@ -50,6 +53,7 @@ export default function ConflictList({
   const [regions, setRegions] = useState<string[]>([]);
   const [severities, setSeverities] = useState<string[]>([]);
   const [statuses, setStatuses] = useState<string[]>([]);
+  const [sortBy, setSortBy] = useState<SortKey>("severity");
 
   const regionOptions = useMemo(
     () => Array.from(new Set(conflicts.map((c) => c.region))).sort(),
@@ -80,8 +84,25 @@ export default function ConflictList({
       list = list.filter((c) => severities.includes(c.severity));
     if (statuses.length)
       list = list.filter((c) => statuses.includes(c.status));
+
+    // Sort
+    list = [...list].sort((a, b) => {
+      switch (sortBy) {
+        case "severity":
+          return (SEVERITY_ORDER[a.severity] ?? 4) - (SEVERITY_ORDER[b.severity] ?? 4);
+        case "casualties":
+          return b.totalCasualties - a.totalCasualties;
+        case "date":
+          return new Date(b.startDate).getTime() - new Date(a.startDate).getTime();
+        case "name":
+          return a.name.localeCompare(b.name);
+        default:
+          return 0;
+      }
+    });
+
     return list;
-  }, [conflicts, search, regions, severities, statuses]);
+  }, [conflicts, search, regions, severities, statuses, sortBy]);
 
   const resetAll = () => {
     setRegions([]);
@@ -182,11 +203,52 @@ export default function ConflictList({
         )}
       </div>
 
-      {/* Results count */}
-      <p className="text-sm text-[var(--muted)]">
-        {filtered.length} conflict{filtered.length !== 1 ? "s" : ""}
-        {activeCount > 0 || search ? " matching filters" : ""}
-      </p>
+      {/* Summary stats bar */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3 text-center">
+          <p className="text-2xl font-bold text-[var(--foreground)]">{filtered.length}</p>
+          <p className="text-xs text-[var(--muted)]">Conflict{filtered.length !== 1 ? "s" : ""}</p>
+        </div>
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3 text-center">
+          <p className="text-2xl font-bold text-[var(--foreground)]">
+            {filtered.reduce((s, c) => s + c.totalCasualties, 0).toLocaleString()}
+          </p>
+          <p className="text-xs text-[var(--muted)]">Total casualties</p>
+        </div>
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3 text-center">
+          <p className="text-2xl font-bold text-[var(--foreground)]">
+            ${(filtered.reduce((s, c) => s + c.economicLossUsd, 0) / 1_000_000_000).toFixed(1)}B
+          </p>
+          <p className="text-xs text-[var(--muted)]">Total losses</p>
+        </div>
+        <div className="rounded-lg border border-[var(--border)] bg-[var(--panel)] p-3 text-center">
+          <p className="text-2xl font-bold text-[var(--foreground)]">
+            {new Set(filtered.flatMap((c) => c.participants.map((p) => p.isoCode))).size}
+          </p>
+          <p className="text-xs text-[var(--muted)]">Nations involved</p>
+        </div>
+      </div>
+
+      {/* Sort + results count */}
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-[var(--muted)]">
+          {filtered.length} conflict{filtered.length !== 1 ? "s" : ""}
+          {activeCount > 0 || search ? " matching filters" : ""}
+        </p>
+        <div className="flex items-center gap-2">
+          <ArrowUpDown className="h-3.5 w-3.5 text-[var(--muted)]" />
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortKey)}
+            className="rounded-lg border border-[var(--border)] bg-[var(--panel)] px-3 py-1.5 text-xs text-[var(--foreground)] focus:outline-none focus:border-primary-500"
+          >
+            <option value="severity">Severity</option>
+            <option value="casualties">Casualties</option>
+            <option value="date">Most recent</option>
+            <option value="name">Name (A-Z)</option>
+          </select>
+        </div>
+      </div>
 
       {/* Conflict cards */}
       {filtered.length ? (
